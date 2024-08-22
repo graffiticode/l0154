@@ -29,7 +29,6 @@ export function ModelEditor({ state }) {
 }
 
 export function MagicSquare({ state }) {
-//  console.log("L0153 MagicSquare() state=" + JSON.stringify(state));
   return (
     (state === undefined || state.data === undefined) &&
     <div /> ||
