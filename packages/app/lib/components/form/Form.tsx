@@ -2,7 +2,7 @@ import type { NodeViewComponentProps } from "@nytimes/react-prosemirror";
 import type { ReactNodeViewConstructor } from "@nytimes/react-prosemirror";
 
 import GridEditor from "./GridEditor.js";
-import "./MagicSquare.css";
+import "./Form.css";
 
 import 'prosemirror-view/style/prosemirror.css';
 import 'prosemirror-menu/style/menu.css';
@@ -136,7 +136,7 @@ export function ModelEditor({ state }) {
   );
 }
 
-export function MagicSquare({ state }) {
+export function Form({ state }) {
   const { expression, problemStatement } = state.data;
   const html = katex.renderToString(expression, {
     displayMode: true,

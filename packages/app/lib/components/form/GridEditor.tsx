@@ -6,17 +6,18 @@ import { useCallback, useState, useEffect } from "react";
 import { debounce } from "lodash";
 
 import { ProseMirror, useNodeViews } from "@nytimes/react-prosemirror";
-//import type { NodeViewComponentProps } from "@nytimes/react-prosemirror";
-//import type { ReactNodeViewConstructor } from "@nytimes/react-prosemirror";
 import { react } from "@nytimes/react-prosemirror";
 
-import GridMenu from "./GridMenu.js";
-import "./AreaModel.css";
+import "./Form.css";
 
 import 'prosemirror-view/style/prosemirror.css';
 import 'prosemirror-menu/style/menu.css';
 import 'prosemirror-example-setup/style/style.css';
 import 'prosemirror-gapcursor/style/gapcursor.css';
+
+import { Plugin } from "prosemirror-state";
+import { Decoration, DecorationSet } from "prosemirror-view";
+
 
 import { schema as baseSchema } from 'prosemirror-schema-basic';
 
@@ -95,14 +96,12 @@ const createDocNode = doc => {
   );
 };
 
-import { Plugin } from "prosemirror-state";
-import { Decoration, DecorationSet } from "prosemirror-view";
-
 const applyDecoration = ({ doc, cells }) => {
   const decorations = [];
   cells.forEach(({ from, to, color, border }) => {
     decorations.push(Decoration.node(from, to, {
       style: `
+        text-align: center;
         background-color: ${color};
         ${border};
       `
@@ -149,129 +148,84 @@ const getCells = (doc) => {
   return cells;
 };
 
-const placeValue = val => {
-  let divisor = 10;
-  while (val >= divisor) {
-    divisor *= 10;
+function rotateGrid({ grid, turns }) {
+  turns = turns % 4;  // Normalize the number of turns
+  while (turns > 0) {
+    grid = grid[0].map((_, colIndex) => grid.map(row => row[colIndex]).reverse());
+    turns--;
   }
-  return String(divisor).length - 1;
+  return grid;
 }
 
-const shapeGridTermsByValue = ({ cells, terms }) => {
-  const { row: rowCount, col: colCount } = cells[cells.length - 1];
-  const dims = [terms[0].length + 1, terms[1].length + 1];
-  terms = colCount === dims[0] && rowCount == dims[1] && terms || terms.reverse();
-  // 1. order terms according to cells
-  // 2. shape terms according to cells
-  let rowAligned = 0;
-  let rowUnaligned = 0;
-  let colAligned = 0;
-  let colUnaligned = 0;
-  cells.forEach(({ row, col, val }) => {
-    // Align ascending vs descending terms.
-    if (val) {
-      const pv = placeValue(val);
-      rowAligned += row === 1 && placeValue(terms[0][col - 2]) === pv && 1 || 0;
-      rowUnaligned += row === 1 && placeValue(terms[0][terms[0].length - (col - 1)]) === pv && 1 || 0;
-      colAligned += col === 1 && placeValue(terms[1][row - 2]) === pv && 1 || 0;
-      colUnaligned += col === 1 && placeValue(terms[1][terms[1].length - (row - 1)]) === pv && 1 || 0;
-    }
-  });
-  if (rowUnaligned > rowAligned) {
-    terms[0] = terms[0].reverse();
-  }
-  if (colUnaligned > colAligned) {
-    terms[1] = terms[1].reverse();
-  }
+function reflectGrid({ grid, turns }) {
+  return turns % 2 === 0 && grid || grid.map(row => [...row].reverse());
+}
 
-  // Now pivot grid if necessary.
-
-  let aligned = 0;
-  let unaligned = 0;
-  cells.forEach(({ row, col, val }) => {
-    if (val) {
-      // Try to match the terms to the current values regardless or order to see
-      // if we need to pivot or not.
-      unaligned += row === 1 && terms[1][col - 2] === val && 1 || 0;
-      unaligned += row === 1 && terms[1][terms[1].length - (col - 2) - 1] === val && 1 || 0;
-      unaligned += col === 1 && terms[0][row - 2] === val && 1 || 0;
-      unaligned += col === 1 && terms[0][terms[0].length - (row - 2) - 1] === val && 1 || 0;
-
-      aligned   += row === 1 && terms[0][col - 2] === val && 1 || 0;
-      aligned   += row === 1 && terms[0][terms[0].length - (col - 2) - 1] === val && 1 || 0;
-      aligned   += col === 1 && terms[1][row - 2] === val && 1 || 0;
-      aligned   += col === 1 && terms[1][terms[1].length - (row - 2) - 1] === val && 1 || 0;
-    }
-  });
-  terms = unaligned > aligned && terms.reverse() || terms;
-  return terms;
+const matchTerms = ({ cells, terms }) => {
+  const flattenedCells = cells.flat().map(cell => cell.val);
+  const flattenedTerms = terms.flat();
+  return flattenedTerms.filter((val, index) => val === flattenedCells[index]);
 };
 
-const getGridCellColor = ({ row, col, val, rowVals, colVals, terms }) => {
-  return (row === 1 && col > 1 && terms[0][col - 2] !== val ||
-          col === 1 && row > 1 && terms[1][row - 2] !== val) && "#fdd" ||
-    row > 1 && col > 1 && val !== rowVals[row] * colVals[col] && "#fee" ||
-    null;
+const matchTermsToCells = ({ cells, terms }) => {
+  cells = cells;
+  // Rotate and reflect terms to match cells.
+  const termsMatches = [];
+  const reflectedRotatedTermsList = [];
+  [0, 1].forEach((_, reflectTurns) => {
+    const reflectedGrid = reflectGrid({ grid: terms, turns: reflectTurns });
+    [0, 1, 2, 3].forEach((_, rotateTurns) => {
+      const reflectedRotatedTerms = rotateGrid({grid: reflectedGrid, turns: rotateTurns});
+      reflectedRotatedTermsList.push(reflectedRotatedTerms);
+      termsMatches.push(matchTerms({cells, terms: reflectedRotatedTerms}));
+    });
+  });
+  const termsMatchedIndex = termsMatches.reduce(
+    (matchedIndex, terms, index) => terms.length > termsMatches[matchedIndex].length ?
+      index :
+      matchedIndex,
+    0
+  );
+  const termsMatched = reflectedRotatedTermsList[termsMatchedIndex];
+  return termsMatched;
+};
+
+const getGridCellColor = ({ val, term }) => {
+  return val === term && "#efe" || "#fee";
 };
 
 const applyModelRules = ({ doc, terms, showFeedback }) => {
-  // Multiply first row and first column values and compare to body values.
   const cells = getCells(doc);
-  let rowVals = [];
-  let colVals = [];
-  let rowSums = [];
-  let colSums = [];
   let cellColors = [];
+  const shapedTerms = matchTermsToCells({ cells, terms });
   cells.forEach(({ row, col, val }) => {
-    if (row === 1) {
-      colVals[col] = val;
-    } else {
-      if (colSums[col] === undefined) {
-        colSums[col] = val;
-      } else {
-        colSums[col] += val;
-      }
-    }
     if (cellColors[row] === undefined) {
       cellColors[row] = [];
     }
-    if (col === 1) {
-      rowVals[row] = val;
-    } else {
-      if (rowSums[row] === undefined) {
-        rowSums[row] = val;
-      } else {
-        rowSums[row] += val;
-      }
-    }
-    const shapedTerms = shapeGridTermsByValue({ cells, terms });
-    const color = getGridCellColor({row, col, val, rowVals, colVals, terms: shapedTerms});
+    const term = shapedTerms[row - 1][col - 1];
+    const color = getGridCellColor({val, term});
     cellColors[row][col] = color;
   });
   const coloredCells = cells.map(cell => ({
     ...cell,
     border:
-    cell.col === 1 && cell.row === 1 && "border: 1px solid #aaa; border-right: 1.5px solid #333; border-bottom: 1.5px solid #333;" ||
-      cell.col === 1 && "border: 1px solid #aaa; border-right: 1.5px solid #333;" ||
-      cell.row === 1 && "border: 1px solid #aaa; border-bottom: 1.5px solid #333;" ||
       "border: 1px solid #aaa;",
     color:
       showFeedback && (
-        isNaN(cell.val) && ((cell.col === 1 || cell.row === 1) && "#eee" || "#fff") ||
+        isNaN(cell.val) && "#fff" ||
         cellColors[cell.row] && cellColors[cell.row][cell.col] ||
-          (cell.col === 1 || cell.row === 1) && "#dfd" || "#efe"
+          "#efe"
       ) ||
-      (cell.col === 1 || cell.row === 1) && "#eee" ||
       "#fff"
   }));
   return applyDecoration({doc, cells: coloredCells});
 }
 
-export default function GridEditor({ state, reactNodeViews }) {
+export default function GridEditor({ state, doc, reactNodeViews }) {
   const { nodeViews, renderNodeViews } = useNodeViews(reactNodeViews);
   const [ modelMount, setModelMount ] = useState<HTMLDivElement | null>(null);
   const [ modelEditorState, setModelEditorState ] = useState(EditorState.create({
-    doc: createDocNode(state.data.gridDoc),
+    doc: createDocNode(doc),
     schema,
       plugins: [
         columnResizing(),
@@ -292,29 +246,25 @@ export default function GridEditor({ state, reactNodeViews }) {
     []
   );
 
-  let gridDoc = modelEditorState.doc.toJSON();
+  let modelDoc = modelEditorState.doc.toJSON();
   useEffect(() => {
     debouncedApply({
       state,
       type: "change",
       args: {
-        gridDoc,
+        modelDoc,
       },
     });
-  }, [JSON.stringify(gridDoc)]);
+  }, [JSON.stringify(modelDoc)]);
 
   return (
       <div className="">
-        <div className="text-lg py-4">
-          Create an area model to find the partial sums of the expression.
-        </div>
         <ProseMirror
           mount={modelMount}
           state={modelEditorState}
           nodeViews={nodeViews}
           dispatchTransaction={dispatchTransaction}
         >
-          <GridMenu showGridButtons={!state.data.initializeGrid} />
           <div ref={setModelMount} className={`w-fit`} />
           {renderNodeViews()}
         </ProseMirror>

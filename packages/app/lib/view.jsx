@@ -3,8 +3,8 @@ import useSWR from 'swr';
 import { createState } from "./lib/state";
 import { compile, getData } from './swr/fetchers';
 import './index.css';
-import { AreaModel, MagicSquare } from "./components";
-export { AreaModel, MagicSquare } from "./components";
+import { Form } from "./components";
+export { Form } from "./components";
 
 function isNonNullNonEmptyObject(obj) {
   return (
@@ -38,7 +38,7 @@ export const View = () => {
   }, [id]);
 
   const [ state ] = useState(createState({}, (data, { type, args }) => {
-    console.log("L0154 state.apply() type=" + type + " args=" + JSON.stringify(args, null, 2));
+    // console.log("L0154 state.apply() type=" + type + " args=" + JSON.stringify(args, null, 2));
     switch (type) {
     case "compile":
       return {
@@ -91,7 +91,7 @@ export const View = () => {
   }
   return (
     isNonNullNonEmptyObject(state.data) &&
-      <MagicSquare state={state} /> ||
+      <Form state={state} /> ||
       <div />
   );
 }
