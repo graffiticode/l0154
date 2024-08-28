@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import useSWR from 'swr';
 import { createState } from "./lib/state";
 import { compile, getData } from './swr/fetchers';
-import assert from "assert";
 import './index.css';
 import { AreaModel, MagicSquare } from "./components";
 export { AreaModel, MagicSquare } from "./components";
@@ -67,7 +66,6 @@ export const View = () => {
   );
 
   if (dataResp.data) {
-    assert(dataResp.data.data === undefined);
     state.apply({
       type: "compile",
       args: dataResp.data,
@@ -85,7 +83,6 @@ export const View = () => {
   );
 
   if (compileResp.data) {
-    assert(compileResp.data.data === undefined);
     state.apply({
       type: "compile",
       args: compileResp.data,
@@ -93,10 +90,8 @@ export const View = () => {
     setRecompile(false);
   }
   return (
-    isNonNullNonEmptyObject(state.data) && (
-      state.data.type === "magic-square" && <MagicSquare state={state} /> ||
-        state.data.type === "area-model" && <AreaModel state={state} /> ||
-        <AreaModel state={state} />
-    ) || <div />
+    isNonNullNonEmptyObject(state.data) &&
+      <MagicSquare state={state} /> ||
+      <div />
   );
 }

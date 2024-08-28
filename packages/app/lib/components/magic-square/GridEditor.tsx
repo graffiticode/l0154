@@ -223,11 +223,11 @@ const applyModelRules = ({ doc, terms, showFeedback }) => {
   return applyDecoration({doc, cells: coloredCells});
 }
 
-export default function GridEditor({ state, reactNodeViews }) {
+export default function GridEditor({ state, doc, reactNodeViews }) {
   const { nodeViews, renderNodeViews } = useNodeViews(reactNodeViews);
   const [ modelMount, setModelMount ] = useState<HTMLDivElement | null>(null);
   const [ modelEditorState, setModelEditorState ] = useState(EditorState.create({
-    doc: createDocNode(state.data.gridDoc),
+    doc: createDocNode(doc),
     schema,
       plugins: [
         columnResizing(),
@@ -248,16 +248,16 @@ export default function GridEditor({ state, reactNodeViews }) {
     []
   );
 
-  let gridDoc = modelEditorState.doc.toJSON();
+  let modelDoc = modelEditorState.doc.toJSON();
   useEffect(() => {
     debouncedApply({
       state,
       type: "change",
       args: {
-        gridDoc,
+        modelDoc,
       },
     });
-  }, [JSON.stringify(gridDoc)]);
+  }, [JSON.stringify(modelDoc)]);
 
   return (
       <div className="">
