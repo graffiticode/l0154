@@ -10,6 +10,7 @@ import 'prosemirror-example-setup/style/style.css';
 import 'prosemirror-gapcursor/style/gapcursor.css';
 
 import katex from 'katex';
+import 'katex/dist/katex.min.css';
 import parse from 'html-react-parser';
 
 function Paragraph({ children }: NodeViewComponentProps) {
@@ -149,7 +150,7 @@ export function Form({ state }) {
     <>
       <div className="py-4">
         { problemStatement }
-        <div className="p-4 text-4xl font-semibold text-slate-600">
+        <div className="w-24 p-4 text-4xl font-semibold text-slate-600">
           { parse(html) }
         </div>
       </div>
