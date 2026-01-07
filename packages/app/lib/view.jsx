@@ -17,6 +17,7 @@ function isNonNullNonEmptyObject(obj) {
 export const View = () => {
   const [ id, setId ] = useState();
   const [ accessToken, setAccessToken ] = useState();
+  const [ targetOrigin, setTargetOrigin ] = useState();
   const [ doGetData, setDoGetData ] = useState(true);
   const [ recompile, setRecompile ] = useState(false);
   const [ height, setHeight ] = useState(0);
@@ -27,6 +28,7 @@ export const View = () => {
       setId(params.get("id"));
       const accessToken = params.get("access_token");
       setAccessToken(accessToken);
+      setTargetOrigin(params.get("origin"));
       const data = params.get("data");
       if (data) {
         state.apply({
@@ -81,6 +83,14 @@ export const View = () => {
       type: "compile",
       args: dataResp.data,
     });
+    // Notify parent that data is loaded
+    if (targetOrigin && id) {
+      window.parent.postMessage({
+        type: 'data-updated',
+        itemId: id,
+        data: dataResp.data,
+      }, targetOrigin);
+    }
     setDoGetData(false);
   }
 
