@@ -1,6 +1,21 @@
 import type { NodeViewComponentProps } from "@nytimes/react-prosemirror";
 import type { ReactNodeViewConstructor } from "@nytimes/react-prosemirror";
 
+function renderErrors(errors: string[]) {
+  return (
+    <div className="flex flex-col gap-2">
+      {errors.map((error, i) => (
+        <div
+          key={i}
+          className="rounded-md p-3 border text-sm bg-red-50 border-red-200 text-red-800"
+        >
+          {error}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 import GridEditor from "./GridEditor.js";
 import "./Form.css";
 
@@ -138,6 +153,9 @@ export function ModelEditor({ state }) {
 }
 
 export function Form({ state }) {
+  if (Array.isArray(state.data?.ERRORS) && state.data.ERRORS.length > 0) {
+    return renderErrors(state.data.ERRORS);
+  }
   const { expression, problemStatement } = state.data;
   const html = katex.renderToString(expression, {
     displayMode: true,
