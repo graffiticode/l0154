@@ -4,9 +4,10 @@ WORKDIR /usr/src/app
 
 ENV NODE_ENV=production
 
-# Copy package files
+# Copy package files and local dependencies
 COPY package*.json ./
 COPY packages/api/package*.json ./packages/api/
+COPY packages/api/*.tgz ./packages/api/
 COPY packages/app/package*.json ./packages/app/
 
 # Install dependencies
