@@ -14,7 +14,7 @@
   "dependencies": {
     "@artcompiler/parselatex": "file:artcompiler-parselatex-1.7.0.tgz",
     "@graffiticode/auth": "^2.1.2",
-    "@graffiticode/basis": "^1.5.0",
+    "@graffiticode/basis": "^1.6.3",
     "@graffiticode/parselatex": "^1.7.7",
     "cors": "^2.8.5",
     "errorhandler": "^1.5.1",
