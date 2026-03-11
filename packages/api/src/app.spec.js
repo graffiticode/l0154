@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { startAuthApp } from "@graffiticode/auth/testing";
 import request from "supertest";
 import { createApp } from "./app.js";

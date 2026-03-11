@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { useState, useEffect } from 'react';
 import useSWR from 'swr';
 import { createState } from "./lib/state";

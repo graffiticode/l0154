@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { jest } from "@jest/globals";
 export const mockPromiseError = (err) => {
   return jest.fn().mockImplementation((...params) => {

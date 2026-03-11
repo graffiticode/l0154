@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 #!/usr/bin/env node
 
 import { createApp } from "./app.js";

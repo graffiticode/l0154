@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import "../lib/index.css";
 import type { Preview } from "@storybook/react";
 

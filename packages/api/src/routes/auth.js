@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { buildHttpHandler, parseAuthTokenFromRequest } from "./utils.js";
 
 export default ({ validateToken }) => buildHttpHandler(async (req, res, next) => {

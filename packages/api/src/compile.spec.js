@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { jest } from "@jest/globals";
 import { buildCompile } from "./compile.js";
 import { DATA1, TASK1 } from "./testing/fixture.js";

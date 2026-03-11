@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { postApiCompile, getApiData } from "../lib/api";
 
 export const compile = async ({ accessToken, id, data }) => {

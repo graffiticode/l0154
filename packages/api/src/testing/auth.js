@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import express from "express";
 import morgan from "morgan";
 import { UnauthenticatedError, InvalidArgumentError } from "../errors/http.js";

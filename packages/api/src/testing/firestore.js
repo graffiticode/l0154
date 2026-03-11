@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { admin } from "../storage/firebase.js";
 
 export const clearFirestore = async () => {

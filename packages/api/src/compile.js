@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { compiler } from './compiler.js';
 export async function compile({ auth, authToken, code, data, config }) {
   console.log("compile() code=" + JSON.stringify(code, null, 2));

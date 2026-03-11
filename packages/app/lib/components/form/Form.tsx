@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import type { NodeViewComponentProps } from "@nytimes/react-prosemirror";
 import type { ReactNodeViewConstructor } from "@nytimes/react-prosemirror";
 

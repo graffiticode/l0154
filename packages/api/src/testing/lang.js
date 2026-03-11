@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { createHttpApp } from "@graffiticode/common/http";
 
 const DEFAULT_LEXICON = {

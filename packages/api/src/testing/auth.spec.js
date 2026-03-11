@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { buildFakeAuthProvider, buildArtCompilerAuthApplication } from "./auth.js";
 import request from "supertest";
 

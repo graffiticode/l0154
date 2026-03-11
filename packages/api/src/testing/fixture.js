@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 export const TASK1_ID = "WmHjCp";
 export const TASK1 = {
   lang: "0154",

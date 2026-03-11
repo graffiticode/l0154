@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 window.gcexports.globalLexicon = {
   "hello" : { "tk": 1, "name": "HELLO", "cls": "function", "length": 1 },
   "initializeGrid" : { "tk": 1, "name": "INITIALIZE_GRID", "cls": "function", "length": 2 },

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { getCompilerHost, getCompilerPort, isNonEmptyString } from "./util.js";
 
 describe("util", () => {

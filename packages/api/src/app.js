@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import EventEmitter from "events";
 import errorHandler from "errorhandler";
 import express from "express";

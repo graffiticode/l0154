@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { createClient } from "@graffiticode/auth/client";
 import { UnauthenticatedError } from "./errors/http.js";
 

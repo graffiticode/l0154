@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 const DEBUG = process.env.GRAFFITICODE_DEBUG === "true" || false;
 const assert = (function assert() {
   // If 'DEBUG' is false then 'assert' is a no-op.

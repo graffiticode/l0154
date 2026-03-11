@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { jest } from "@jest/globals";
 import { buildConfigHandler } from "./config.js";
 

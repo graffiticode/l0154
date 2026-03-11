@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { describe } from "@jest/globals";
 import { buildValidateToken } from "./auth.js";
 import { startAuthApp } from "@graffiticode/auth/testing";

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { getConfig } from "./../config/index.js";
 import { buildConfigHandler } from "./config.js";
 

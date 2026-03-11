@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 import { isNonEmptyString, getClientHost, getClientPort } from "../util.js";
 import { HttpError } from "./../errors/http.js";
 import { gql, GraphQLClient } from "graphql-request";
