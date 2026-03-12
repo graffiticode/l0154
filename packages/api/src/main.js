@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: MIT
 #!/usr/bin/env node
+// SPDX-License-Identifier: MIT
 
 import { createApp } from "./app.js";
 
