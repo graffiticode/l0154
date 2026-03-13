@@ -9,7 +9,9 @@
     "start": "node -r @graffiticode/tracing src/main.js",
     "coverage": "nyc npm run test",
     "lint": "eslint src/ tools/",
-    "lint:fix": "eslint --fix src/ tools/"
+    "lint:fix": "eslint --fix src/ tools/",
+    "build-lexicon": "node tools/build-lexicon.js > ./dist/lexicon.js",
+    "build-spec": "npx spec-md ./spec/spec.md > ./dist/spec.html && cp ./spec/instructions.md ./dist/instructions.md && cp ./spec/template.gc ./dist/template.gc"
   },
   "dependencies": {
     "@artcompiler/parselatex": "file:artcompiler-parselatex-1.7.0.tgz",
@@ -36,6 +38,7 @@
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
+    "spec-md": "^3.1.0",
     "typescript": "^5.2.2",
     "vite": "^5.2.0"
   }

@@ -6,7 +6,8 @@
     "packages/app"
   ],
   "scripts": {
-    "build": "npm run -w packages/app build; npm run -w packages/api build",
+    "build": "npm run -w packages/app build && npm run -w packages/api build && npm run build-static",
+    "build-static": "npm run -w packages/api build-lexicon; npm run -w packages/api build-spec",
     "dev": "npm run -w packages/api dev",
     "start": "npm run -w packages/api start",
     "lint": "eslint test/",
