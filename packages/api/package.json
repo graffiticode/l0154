@@ -14,7 +14,7 @@
     "build-spec": "npx spec-md ./spec/spec.md > ./dist/spec.html && cp ./spec/instructions.md ./dist/instructions.md && cp ./spec/template.gc ./dist/template.gc"
   },
   "dependencies": {
-    "@artcompiler/parselatex": "file:artcompiler-parselatex-1.7.0.tgz",
+    "@artcompiler/parselatex": "^1.7.7",
     "@graffiticode/auth": "^2.1.2",
     "@graffiticode/basis": "^1.6.3",
     "@graffiticode/parselatex": "^1.7.7",
