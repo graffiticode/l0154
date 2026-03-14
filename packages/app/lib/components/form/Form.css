@@ -51,6 +51,9 @@ main {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
+  max-height: 200px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .magic-grid-option {
@@ -62,6 +65,7 @@ main {
   cursor: pointer;
 }
 
-.magic-grid-option:hover {
+.magic-grid-option:hover,
+.magic-grid-option-highlight {
   background: #eef;
 }

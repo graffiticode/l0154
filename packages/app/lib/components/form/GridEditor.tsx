@@ -58,7 +58,9 @@ function CellInput({ value, options, onChange, onKeyDown, row, col }: {
   col: number;
 }) {
   const [open, setOpen] = useState(false);
+  const [highlightIndex, setHighlightIndex] = useState(-1);
   const cellRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -70,9 +72,45 @@ function CellInput({ value, options, onChange, onKeyDown, row, col }: {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Scroll highlighted option into view
+  useEffect(() => {
+    if (highlightIndex >= 0 && dropdownRef.current) {
+      const el = dropdownRef.current.children[highlightIndex] as HTMLElement;
+      el?.scrollIntoView({ block: "nearest" });
+    }
+  }, [highlightIndex]);
+
   const handleSelect = (opt: number) => {
     onChange(String(opt));
     setOpen(false);
+    setHighlightIndex(-1);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      setOpen(false);
+      setHighlightIndex(-1);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (open && highlightIndex >= 0 && highlightIndex < options.length) {
+        handleSelect(options[highlightIndex]);
+      } else if (!open) {
+        setOpen(true);
+        setHighlightIndex(0);
+      }
+    } else if (open) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setHighlightIndex(prev => Math.min(prev + 1, options.length - 1));
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setHighlightIndex(prev => Math.max(prev - 1, 0));
+      } else {
+        onKeyDown(e);
+      }
+    } else {
+      onKeyDown(e);
+    }
   };
 
   return (
@@ -87,25 +125,23 @@ function CellInput({ value, options, onChange, onKeyDown, row, col }: {
           const filtered = e.target.value.replace(/[^0-9]/g, "");
           onChange(filtered);
         }}
-        onFocus={() => setOpen(true)}
-        onBlur={() => setOpen(false)}
-        onKeyDown={e => {
-          if (e.key === "Escape") setOpen(false);
-          onKeyDown(e);
-        }}
+        onFocus={() => { setHighlightIndex(-1); }}
+        onBlur={() => { setOpen(false); setHighlightIndex(-1); }}
+        onKeyDown={handleKeyDown}
         className="magic-grid-input"
       />
       {open && (
-        <div className="magic-grid-dropdown">
-          {options.map((opt: number) => (
+        <div ref={dropdownRef} className="magic-grid-dropdown">
+          {options.map((opt: number, i: number) => (
             <button
               key={opt}
               type="button"
-              className="magic-grid-option"
+              className={`magic-grid-option${i === highlightIndex ? " magic-grid-option-highlight" : ""}`}
               onMouseDown={e => {
                 e.preventDefault();
                 handleSelect(opt);
               }}
+              onMouseEnter={() => setHighlightIndex(i)}
             >
               {opt}
             </button>
