@@ -1,156 +1,14 @@
 // SPDX-License-Identifier: MIT
-import { keymap } from "prosemirror-keymap";
-import { Schema } from "prosemirror-model";
-import { EditorState } from "prosemirror-state";
-import type { Transaction } from "prosemirror-state";
-import { useCallback, useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import debounce from "lodash.debounce";
-
-import { ProseMirror, useNodeViews } from "@nytimes/react-prosemirror";
-import { react } from "@nytimes/react-prosemirror";
-
 import "./Form.css";
 
-import 'prosemirror-view/style/prosemirror.css';
-import 'prosemirror-menu/style/menu.css';
-import 'prosemirror-example-setup/style/style.css';
-import 'prosemirror-gapcursor/style/gapcursor.css';
-
-import { Plugin } from "prosemirror-state";
-import { Decoration, DecorationSet } from "prosemirror-view";
-
-
-import { schema as baseSchema } from 'prosemirror-schema-basic';
-
-import {
-  goToNextCell,
-} from 'prosemirror-tables';
-import { tableEditing, tableNodes /*, fixTables*/ } from 'prosemirror-tables';
-
-const schema = new Schema({
-  nodes: baseSchema.spec.nodes.append(
-    tableNodes({
-      tableGroup: 'block',
-      cellContent: 'block+',
-      cellAttributes: {
-        width: {
-          default: "80px",
-          getFromDOM(dom) {
-            return dom.style.width || null;
-          },
-          setDOMAttr(value, attrs) {
-            if (value !== null) attrs.style = (attrs.style || "") + `width: ${value};`;
-          }
-        },
-        height: {
-          default: "80px",
-          getFromDOM(dom) {
-            return dom.style.height || null;
-          },
-          setDOMAttr(value, attrs) {
-            if (value !== null) attrs.style = (attrs.style || "") + `height: ${value};`;
-          }
-        },
-        background: {
-          default: "#fff",
-          getFromDOM(dom) {
-            return dom.style.backgroundColor || null;
-          },
-          setDOMAttr(value, attrs) {
-            if (value)
-              attrs.style = (attrs.style || '') + `background-color: ${value};`;
-          },
-        },
-        border: {
-          default: "1px solid #aaa",
-          getFromDOM(dom) {
-            return dom.style.border || null;
-          },
-          setDOMAttr(value, attrs) {
-            if (value)
-              attrs.style = (attrs.style || '') + `${value};`;
-          },
-        },
-      },
-    }),
-  ),
-  marks: baseSchema.spec.marks,
-});
-
 const debouncedApply = debounce(({ state, type, args }) => {
-  state.apply && state.apply({type, args});
-}, 1000, {leading: true, trailing: true});
-
-const { table, table_row, table_cell, paragraph } = schema.nodes;
-const cellAttrs = {width: "80px", height: "80px", background: "#fff"};
-const createDocNode = doc => {
-  return (
-    doc && schema.nodeFromJSON(doc) || schema.node("doc", null, [
-      table.create(null, [
-        table_row.create(null, [
-          table_cell.create(cellAttrs, [
-            paragraph.create(null, [schema.text(" ")]),
-          ]),
-        ]),
-      ])
-    ])
-  );
-};
-
-const applyDecoration = ({ doc, cells }) => {
-  const decorations = [];
-  cells.forEach(({ from, to, color, border }) => {
-    decorations.push(Decoration.node(from, to, {
-      style: `
-        text-align: center;
-        background-color: ${color};
-        ${border};
-      `
-    }));
-  });
-  return DecorationSet.create(doc, decorations);
-};
-
-const modelBackgroundPlugin = ({ terms, showFeedback }) => new Plugin({
-  state: {
-    init(_, { doc }) {
-      return applyModelRules({doc, terms, showFeedback });
-    },
-    apply(tr, decorationSet, oldState, newState) {
-      oldState = oldState;
-      newState = newState;
-      if (tr.docChanged) {
-        return applyModelRules({doc: tr.doc, terms, showFeedback});
-      }
-      return decorationSet;
-    },
-  },
-  props: {
-    decorations(state) {
-      return this.getState(state);
-    }
-  }
-});
-
-const getCells = (doc) => {
-  const cells = [];
-  let row = 0, col = 0;
-  doc.descendants((node, pos) => {
-    if (node.type.name === "table_row") {
-      row++;
-      col = 0;
-    }
-    if (node.type.name === "table_cell") {
-      col++;
-      const val = Number.parseInt(node.textContent.replace(/,/g, ""));
-      cells.push({row, col, val, from: pos, to: pos + node.nodeSize});
-    }
-  });
-  return cells;
-};
+  state.apply && state.apply({ type, args });
+}, 1000, { leading: true, trailing: true });
 
 function rotateGrid({ grid, turns }) {
-  turns = turns % 4;  // Normalize the number of turns
+  turns = turns % 4;
   while (turns > 0) {
     grid = grid[0].map((_, colIndex) => grid.map(row => row[colIndex]).reverse());
     turns--;
@@ -159,115 +17,250 @@ function rotateGrid({ grid, turns }) {
 }
 
 function reflectGrid({ grid, turns }) {
-  return turns % 2 === 0 && grid || grid.map(row => [...row].reverse());
+  return turns % 2 === 0 ? grid : grid.map(row => [...row].reverse());
 }
 
 const matchTerms = ({ cells, terms }) => {
-  const flattenedCells = cells.flat().map(cell => cell.val);
-  const flattenedTerms = terms.flat();
-  return flattenedTerms.filter((val, index) => val === flattenedCells[index]);
+  const flatCells = cells.flat();
+  const flatTerms = terms.flat();
+  return flatTerms.filter((val, index) => val === flatCells[index]);
 };
 
 const matchTermsToCells = ({ cells, terms }) => {
-  cells = cells;
-  // Rotate and reflect terms to match cells.
   const termsMatches = [];
   const reflectedRotatedTermsList = [];
   [0, 1].forEach((_, reflectTurns) => {
     const reflectedGrid = reflectGrid({ grid: terms, turns: reflectTurns });
     [0, 1, 2, 3].forEach((_, rotateTurns) => {
-      const reflectedRotatedTerms = rotateGrid({grid: reflectedGrid, turns: rotateTurns});
-      reflectedRotatedTermsList.push(reflectedRotatedTerms);
-      termsMatches.push(matchTerms({cells, terms: reflectedRotatedTerms}));
+      const rrt = rotateGrid({ grid: reflectedGrid, turns: rotateTurns });
+      reflectedRotatedTermsList.push(rrt);
+      termsMatches.push(matchTerms({ cells, terms: rrt }));
     });
   });
-  const termsMatchedIndex = termsMatches.reduce(
-    (matchedIndex, terms, index) => terms.length > termsMatches[matchedIndex].length ?
-      index :
-      matchedIndex,
+  const bestIndex = termsMatches.reduce(
+    (best, m, i) => m.length > termsMatches[best].length ? i : best,
     0
   );
-  const termsMatched = reflectedRotatedTermsList[termsMatchedIndex];
-  return termsMatched;
+  return reflectedRotatedTermsList[bestIndex];
 };
 
-const getGridCellColor = ({ val, term }) => {
-  return val === term && "#efe" || "#fee";
+const getCellColor = ({ val, term, showFeedback }) => {
+  if (!showFeedback || isNaN(val)) return "#fff";
+  return val === term ? "#efe" : "#fee";
 };
 
-const applyModelRules = ({ doc, terms, showFeedback }) => {
-  const cells = getCells(doc);
-  let cellColors = [];
-  const shapedTerms = matchTermsToCells({ cells, terms });
-  cells.forEach(({ row, col, val }) => {
-    if (cellColors[row] === undefined) {
-      cellColors[row] = [];
-    }
-    const term = shapedTerms[row - 1][col - 1];
-    const color = getGridCellColor({val, term});
-    cellColors[row][col] = color;
-  });
-  const coloredCells = cells.map(cell => ({
-    ...cell,
-    border:
-      "border: 1px solid #aaa;",
-    color:
-      showFeedback && (
-        isNaN(cell.val) && "#fff" ||
-        cellColors[cell.row] && cellColors[cell.row][cell.col] ||
-          "#efe"
-      ) ||
-      "#fff"
-  }));
-  return applyDecoration({doc, cells: coloredCells});
+function CellInput({ value, options, onChange, onKeyDown, row, col }: {
+  value: string;
+  options: number[];
+  onChange: (val: string) => void;
+  onKeyDown: (e: React.KeyboardEvent) => void;
+  row: number;
+  col: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const cellRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (cellRef.current && !cellRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelect = (opt: number) => {
+    onChange(String(opt));
+    setOpen(false);
+  };
+
+  return (
+    <div ref={cellRef} className="magic-grid-cell">
+      <input
+        type="text"
+        inputMode="numeric"
+        data-row={row}
+        data-col={col}
+        value={value}
+        onChange={e => {
+          const filtered = e.target.value.replace(/[^0-9]/g, "");
+          onChange(filtered);
+        }}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
+        onKeyDown={e => {
+          if (e.key === "Escape") setOpen(false);
+          onKeyDown(e);
+        }}
+        className="magic-grid-input"
+      />
+      {open && (
+        <div className="magic-grid-dropdown">
+          {options.map((opt: number) => (
+            <button
+              key={opt}
+              type="button"
+              className="magic-grid-option"
+              onMouseDown={e => {
+                e.preventDefault();
+                handleSelect(opt);
+              }}
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
-export default function GridEditor({ state, doc, reactNodeViews }) {
-  const { nodeViews, renderNodeViews } = useNodeViews(reactNodeViews);
-  const [ modelMount, setModelMount ] = useState<HTMLDivElement | null>(null);
-  const [ modelEditorState, setModelEditorState ] = useState(EditorState.create({
-    doc: createDocNode(doc),
-    schema,
-      plugins: [
-        tableEditing(),
-        keymap({
-          Tab: goToNextCell(1),
-          'Shift-Tab': goToNextCell(-1),
-        }),
-        react(),
-        modelBackgroundPlugin(state.data),
-      ]
-  }));
+export default function GridEditor({ state, doc }) {
+  const { terms, showFeedback, expression } = state.data;
+  const order = terms.length;
+  const magicNumber = parseInt(expression);
 
-  const dispatchTransaction = useCallback(
-    (tr: Transaction) => (
-      setModelEditorState((oldState) => oldState.apply(tr))
-    ),
-    []
+  const getInitialValues = () => {
+    const values: string[][] = Array.from({ length: order }, () =>
+      Array.from({ length: order }, () => "")
+    );
+    if (doc?.content?.[0]?.content) {
+      doc.content[0].content.forEach((row, r) => {
+        row.content?.forEach((cell, c) => {
+          const text = cell.content?.[0]?.content?.[0]?.text || "";
+          values[r][c] = text.trim();
+        });
+      });
+    }
+    return values;
+  };
+
+  const [values, setValues] = useState<string[][]>(getInitialValues);
+  const gridRef = useRef<HTMLTableElement>(null);
+
+  // All integers from 1 to magicNumber - 1
+  const allOptions = Array.from({ length: magicNumber - 1 }, (_, i) => i + 1);
+
+  const numericValues = values.map(row => row.map(v => parseInt(v)));
+  const matchedTerms = matchTermsToCells({ cells: numericValues, terms });
+  const cellColors = values.map((row, r) =>
+    row.map((_, c) => getCellColor({
+      val: numericValues[r][c],
+      term: matchedTerms[r][c],
+      showFeedback,
+    }))
   );
 
-  let modelDoc = modelEditorState.doc.toJSON();
+  const buildModelDoc = (vals: string[][]) => ({
+    type: "doc",
+    content: [{
+      type: "table",
+      content: vals.map(row => ({
+        type: "table_row",
+        content: row.map(cell => ({
+          type: "table_cell",
+          attrs: { colspan: 1, rowspan: 1, colwidth: null, width: "80px", height: "80px", background: "#fff" },
+          content: [{
+            type: "paragraph",
+            content: cell ? [{ type: "text", text: cell }] : undefined,
+          }],
+        })),
+      })),
+    }],
+  });
+
   useEffect(() => {
     debouncedApply({
       state,
       type: "change",
-      args: {
-        modelDoc,
-      },
+      args: { modelDoc: buildModelDoc(values) },
     });
-  }, [JSON.stringify(modelDoc)]);
+  }, [JSON.stringify(values)]);
+
+  const handleChange = (r: number, c: number, val: string) => {
+    setValues(prev => {
+      const next = prev.map(row => [...row]);
+      // Clear the same number from any other cell
+      if (val !== "") {
+        for (let ri = 0; ri < order; ri++) {
+          for (let ci = 0; ci < order; ci++) {
+            if ((ri !== r || ci !== c) && next[ri][ci] === val) {
+              next[ri][ci] = "";
+            }
+          }
+        }
+      }
+      next[r][c] = val;
+      return next;
+    });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, r: number, c: number) => {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      const next = e.shiftKey ? getPrevCell(r, c) : getNextCell(r, c);
+      focusCell(next.r, next.c);
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      focusCell(r, (c + 1) % order);
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      focusCell(r, (c - 1 + order) % order);
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      focusCell((r + 1) % order, c);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      focusCell((r - 1 + order) % order, c);
+    }
+  };
+
+  const getNextCell = (r: number, c: number) => {
+    c++;
+    if (c >= order) { c = 0; r++; }
+    if (r >= order) { r = 0; }
+    return { r, c };
+  };
+
+  const getPrevCell = (r: number, c: number) => {
+    c--;
+    if (c < 0) { c = order - 1; r--; }
+    if (r < 0) { r = order - 1; }
+    return { r, c };
+  };
+
+  const focusCell = (r: number, c: number) => {
+    const input = gridRef.current?.querySelector(
+      `input[data-row="${r}"][data-col="${c}"]`
+    ) as HTMLInputElement | null;
+    input?.focus();
+    input?.select();
+  };
 
   return (
-      <div className="">
-        <ProseMirror
-          mount={modelMount}
-          state={modelEditorState}
-          nodeViews={nodeViews}
-          dispatchTransaction={dispatchTransaction}
-        >
-          <div ref={setModelMount} className={`w-fit`} />
-          {renderNodeViews()}
-        </ProseMirror>
-      </div>
+    <table ref={gridRef} className="magic-grid">
+      <tbody>
+        {values.map((row, r) => (
+          <tr key={r}>
+            {row.map((cell, c) => (
+              <td
+                key={c}
+                style={{ backgroundColor: cellColors[r][c] }}
+              >
+                <CellInput
+                  value={cell}
+                  options={allOptions}
+                  onChange={val => handleChange(r, c, val)}
+                  onKeyDown={e => handleKeyDown(e, r, c)}
+                  row={r}
+                  col={c}
+                />
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }
