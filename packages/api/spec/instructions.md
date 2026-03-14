@@ -20,5 +20,5 @@ Use L0154 to create interactive magic square puzzles where students fill in miss
 ## Example
 
 ```
-magicSquare (rows 3 | cols 3)..
+magicSquare problemStatement "The magic number is" initializeGrid true showFeedback true expression "15"..
 ```
