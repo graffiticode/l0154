@@ -175,8 +175,8 @@ export default function GridEditor({ state, doc }) {
   const [values, setValues] = useState<string[][]>(getInitialValues);
   const gridRef = useRef<HTMLTableElement>(null);
 
-  // All integers from 1 to magicNumber - 1
-  const allOptions = Array.from({ length: magicNumber - 1 }, (_, i) => i + 1);
+  // All integers from 1 to magicNumber - 3
+  const allOptions = Array.from({ length: magicNumber - 3 }, (_, i) => i + 1);
 
   const numericValues = values.map(row => row.map(v => parseInt(v)));
   const matchedTerms = matchTermsToCells({ cells: numericValues, terms });
