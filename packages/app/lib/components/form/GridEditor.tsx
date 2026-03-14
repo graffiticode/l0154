@@ -4,7 +4,7 @@ import { Schema } from "prosemirror-model";
 import { EditorState } from "prosemirror-state";
 import type { Transaction } from "prosemirror-state";
 import { useCallback, useState, useEffect } from "react";
-import { debounce } from "lodash";
+import debounce from "lodash.debounce";
 
 import { ProseMirror, useNodeViews } from "@nytimes/react-prosemirror";
 import { react } from "@nytimes/react-prosemirror";
@@ -25,7 +25,7 @@ import { schema as baseSchema } from 'prosemirror-schema-basic';
 import {
   goToNextCell,
 } from 'prosemirror-tables';
-import { tableEditing, columnResizing, tableNodes /*, fixTables*/ } from 'prosemirror-tables';
+import { tableEditing, tableNodes /*, fixTables*/ } from 'prosemirror-tables';
 
 const schema = new Schema({
   nodes: baseSchema.spec.nodes.append(
@@ -34,7 +34,7 @@ const schema = new Schema({
       cellContent: 'block+',
       cellAttributes: {
         width: {
-          default: "50px",
+          default: "80px",
           getFromDOM(dom) {
             return dom.style.width || null;
           },
@@ -43,7 +43,7 @@ const schema = new Schema({
           }
         },
         height: {
-          default: "50px",
+          default: "80px",
           getFromDOM(dom) {
             return dom.style.height || null;
           },
@@ -82,7 +82,7 @@ const debouncedApply = debounce(({ state, type, args }) => {
 }, 1000, {leading: true, trailing: true});
 
 const { table, table_row, table_cell, paragraph } = schema.nodes;
-const cellAttrs = {width: "50px", height: "50px", background: "#fff"};
+const cellAttrs = {width: "80px", height: "80px", background: "#fff"};
 const createDocNode = doc => {
   return (
     doc && schema.nodeFromJSON(doc) || schema.node("doc", null, [
@@ -229,7 +229,6 @@ export default function GridEditor({ state, doc, reactNodeViews }) {
     doc: createDocNode(doc),
     schema,
       plugins: [
-        columnResizing(),
         tableEditing(),
         keymap({
           Tab: goToNextCell(1),

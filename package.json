@@ -12,6 +12,8 @@
     "start": "npm run -w packages/api start",
     "lint": "eslint test/",
     "lint:fix": "eslint --fix test/",
+    "pack": "npm run -w packages/app pack",
+    "publish": "npm publish -w packages/app",
     "sync": "npm run -w packages/app pack; rm ~/work/artcompiler/learnosity-integrations/question-l0154/*.tgz; cp packages/app/*.tgz ~/work/artcompiler/learnosity-integrations/question-l0154",
     "gcp:build": "gcloud builds submit --config cloudbuild.yaml --substitutions=COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo latest)",
     "gcp:deploy": "gcloud run deploy l0154 --source . --port 50154 --region us-central1 --platform managed --allow-unauthenticated",

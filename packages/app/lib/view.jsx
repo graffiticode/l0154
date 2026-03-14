@@ -5,7 +5,6 @@ import { createState } from "./lib/state";
 import { compile, getData } from './swr/fetchers';
 import './index.css';
 import { Form } from "./components";
-export { Form } from "./components";
 
 function isNonNullNonEmptyObject(obj) {
   return (

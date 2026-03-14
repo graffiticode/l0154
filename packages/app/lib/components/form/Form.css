@@ -62,18 +62,17 @@ main {
 .ProseMirror table {
   border-collapse: collapse;
   table-layout: fixed;
-  width: 250;
-  height: 250;
   overflow: hidden;
   border: 1px solid black;
-  height: 24px;
 }
 .ProseMirror td,
 .ProseMirror th {
   vertical-align: middle;
   box-sizing: border-box;
   position: relative;
-  text-align: right;
+  text-align: center;
+  width: 80px;
+  height: 80px;
   padding: 10px;
   border: 1px solid black;
 }
