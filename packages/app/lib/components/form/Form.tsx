@@ -7,6 +7,9 @@ import "./Form.css";
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import parse from 'html-react-parser';
+import backgroundImage from '../../images/blue-texture.png';
+
+const BG_SKY = "bg-[#B5DDFF]";
 
 function renderErrors(errors: { message: string; from: number; to: number }[]) {
   return (
@@ -32,7 +35,7 @@ export function Form({ state }) {
     return renderErrors(state.data.errors);
   }
 
-  const { expression, problemStatement } = state.data;
+  const { expression, problemStatement, useBgTexture } = state.data;
   const html = katex.renderToString(expression, {
     displayMode: true,
     output: "html",
@@ -40,7 +43,10 @@ export function Form({ state }) {
   });
 
   return (
-    <div className="min-h-full bg-transparent">
+    <div
+      className={`p-10 min-h-screen w-full bg-repeat bg-auto bg-center ${BG_SKY}`}
+      style={useBgTexture ? { backgroundImage: `url(${backgroundImage})` } : {}}
+    >
       <div className="py-4">
         <div className="prose prose-sm max-w-none">
           <ReactMarkdown>{problemStatement}</ReactMarkdown>

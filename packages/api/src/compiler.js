@@ -68,6 +68,24 @@ export class Transformer extends BasisTransformer {
     });
   }
 
+  USE_BG_TEXTURE(node, options, resume) {
+    this.visit(node.elts[1], options, async (e1, v1) => {
+      this.visit(node.elts[0], options, async (e0, v0) => {
+        const data = options?.data || {};
+        const useBgTexture =
+              data.useBgTexture !== undefined
+              ? data.useBgTexture
+              : v0;
+        const err = [];
+        const val = {
+          ...v1,
+          useBgTexture,
+        };
+        resume(err, val);
+      });
+    });
+  }
+
   SHOW_FEEDBACK(node, options, resume) {
     this.visit(node.elts[1], options, async (e1, v1) => {
       this.visit(node.elts[0], options, async (e0, v0) => {

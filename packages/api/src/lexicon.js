@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: MIT
 export const lexicon = {
+  "useBgTexture": {
+    "tk": 1,
+    "name": "USE_BG_TEXTURE",
+    "cls": "function",
+    "length": 2,
+    "arity": 2
+  },
   "initializeGrid": {
     "tk": 1,
     "name": "INITIALIZE_GRID",
