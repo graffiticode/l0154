@@ -55,8 +55,8 @@ document.addEventListener("DOMContentLoaded", function () {
 <header>
 <h1>Graffiticode Core Language Specification</h1>
 <section id="intro">
-<pre><code>Version: 0.1.3
-Date: 2026-03-19
+<pre><code>Version: 0.1.4
+Date: 2026-03-20
 </code></pre>
 </section>
 <nav class="spec-toc">
@@ -86,14 +86,7 @@ Date: 2026-03-19
 <li><a href="#sec-Primitive-Types"><span class="spec-secid">4.1</span>Primitive Types</a></li>
 <li><a href="#sec-Composite-Types"><span class="spec-secid">4.2</span>Composite Types</a></li>
 <li><a href="#sec-Function-Types"><span class="spec-secid">4.3</span>Function Types</a></li>
-<li><a href="#sec-Tag-Sets-and-Tag-Value-Type"><span class="spec-secid">4.4</span>Tag Sets and Tag Value Type</a><ol>
-<li><a href="#sec-Tag-Identity-and-Type"><span class="spec-secid">4.4.1</span>Tag Identity and Type</a></li>
-<li><a href="#sec-Tag-Sets-as-Structural-Types"><span class="spec-secid">4.4.2</span>Tag Sets as Structural Types</a></li>
-<li><a href="#sec-Default-Type-tag-"><span class="spec-secid">4.4.3</span>Default Type: `tag`</a></li>
-<li><a href="#sec-Example"><span class="spec-secid">4.4.4</span>Example</a></li>
-</ol>
-</li>
-<li><a href="#sec-Example-Annotated-Definitions"><span class="spec-secid">4.5</span>Example: Annotated Definitions</a></li>
+<li><a href="#sec-Tag-Type"><span class="spec-secid">4.4</span>Tag Type</a></li>
 </ol>
 </li>
 <li><a href="#sec-Semantics"><span class="spec-secid">5</span>Semantics</a><ol>
@@ -167,6 +160,7 @@ Date: 2026-03-19
 <li><strong>Identifiers</strong>: Alphanumeric symbols beginning with a letter.</li>
 <li><strong>Numbers</strong>: Integers and floats. Negative numbers start with <code>-</code>.</li>
 <li><strong>Strings</strong>: Double-quoted UTF-8 strings.</li>
+<li><strong>Keywords</strong>: <code>let</code>, <code>case</code>, <code>of</code>, <code>end</code>, <code>tag</code>, <code>true</code>, <code>false</code></li>
 <li><strong>Symbols</strong>: <code>(</code>, <code>)</code>, <code>[</code>, <code>]</code>, <code>{</code>, <code>}</code>, <code>:</code>, <code>..</code>, <code>&lt;</code>, <code>&gt;</code>, <code>,</code></li>
 </ul>
 </section>
@@ -217,22 +211,23 @@ let y = 2..
 </section>
 <section id="sec-Tags" secid="3.2.4">
 <h3><span class="spec-secid" title="link to this section"><a href="#sec-Tags">3.2.4</a></span>Tags</h3>
-<p>A <strong>tag value</strong> is an arity-0 symbolic value used to represent symbolic variants in pattern matching or other symbolic forms.</p>
-<p>Tag values are <strong>only defined</strong> by using record shorthand syntax. For example:</p>
-<pre data-language="gc"><code>{red blue green}   | defines the tag values red, blue, and green
+<p>A <strong>tag value</strong> is a symbolic value used to represent constants for pattern matching or other symbolic forms. Tags are identified by their name. Any two tags with the same name are equivalent.</p>
+<p>The <code>tag</code> keyword followed by an identifier constructs a tag value:</p>
+<pre data-language="gc"><code>let red = tag red..
 </code></pre>
 <p>Tag values:</p>
 <ul>
-<li>Must be introduced via record shorthand notation</li>
-<li>Are resolved as symbolic constants with identity semantics</li>
-<li>Match directly in <code>case</code> expressions:</li>
+<li>Have value semantics &mdash; same name means same tag</li>
+<li>Can be used anywhere a value is expected</li>
 </ul>
-<pre><code>let color = get "red" {red blue green}
+<pre data-language="gc"><code>let red = tag red..
+let blue = tag blue..
+let color = red..
 case color of
   red: "warm"
   blue: "cool"
   _: "other"
-end
+end..
 </code></pre>
 </section>
 <section id="sec-Lambdas" secid="3.2.5">
@@ -258,6 +253,7 @@ end
 </code></pre>
 <div class="spec-production" id="Supports">
 <span class="spec-nt"><a href="#Supports" data-name="Supports">Supports</a></span><div class="spec-rhs"><span class="spec-nt"><span data-name="Literal">Literal</span></span><span class="spec-t">values</span></div>
+<div class="spec-rhs"><span class="spec-nt"><span data-name="Tag">Tag</span></span><span class="spec-t">values</span><span class="spec-t">(matched</span><span class="spec-t">by</span><span class="spec-t">identity)</span></div>
 <div class="spec-rhs"><span class="spec-nt"><span data-name="Tuple">Tuple</span></span><span class="spec-t">destructuring:</span><span class="spec-t">(a, b)</span></div>
 <div class="spec-rhs"><span class="spec-nt"><span data-name="Record">Record</span></span><span class="spec-t">destructuring:</span><span class="spec-t">{ name, age }</span></div>
 <div class="spec-rhs"><span class="spec-nt"><span data-name="Wildcard">Wildcard</span></span><span class="spec-t">_</span></div>
@@ -291,56 +287,19 @@ end
 <p>Functions are written using Graffiticode lambda signature syntax: <code>&lt;number number: number&gt;   | function taking two numbers and returning a number &lt;string: [string]&gt;        | function taking a string and returning a list of strings &lt;list record: record&gt;     | common signature for structural transformation</code></p>
 <p>Function types are curried by default. That means: <code>&lt;number number: number&gt;</code> is equivalent to a function that returns another function: <code>&lt;number: &lt;number: number&gt;&gt;</code></p>
 </section>
-<section id="sec-Tag-Sets-and-Tag-Value-Type" secid="4.4">
-<h2><span class="spec-secid" title="link to this section"><a href="#sec-Tag-Sets-and-Tag-Value-Type">4.4</a></span>Tag Sets and Tag Value Type</h2>
-<p>Tag values are symbolic constants introduced using record shorthand syntax. They have a default type of <code>tag</code>, and their identity is preserved across bindings.</p>
-<section id="sec-Tag-Identity-and-Type" secid="4.4.1">
-<h3><span class="spec-secid" title="link to this section"><a href="#sec-Tag-Identity-and-Type">4.4.1</a></span>Tag Identity and Type</h3>
-<p>Tag values are symbolic constants identified <strong>solely by their name</strong>. The same tag name (e.g., <code>A</code>) refers to the same symbolic value, regardless of where it is defined.</p>
-<p>Tag values compare equal by name. For example, <code>A</code> in <code>{A B}</code> and <code>A</code> in <code>{A C}</code> are equal.</p>
-</section>
-<section id="sec-Tag-Sets-as-Structural-Types" secid="4.4.2">
-<h3><span class="spec-secid" title="link to this section"><a href="#sec-Tag-Sets-as-Structural-Types">4.4.2</a></span>Tag Sets as Structural Types</h3>
-<p>Although tag values are globally identified by name, the <strong>type system tracks which tags are expected to co-occur</strong>.</p>
-<p>For example, <code>{A B}</code> and <code>{A C}</code> are different types:</p>
-<pre><code>{A B}    | type: { A: tag, B: tag }
-{A C}    | type: { A: tag, C: tag }
-</code></pre>
-<p>This allows the type system to constrain the expected context for pattern matching, record shapes, or enum-style uses of tags.</p>
-<p>Using tags not part of the expected set results in a type error.</p>
-</section>
-<section id="sec-Default-Type-tag-" secid="4.4.3">
-<h3><span class="spec-secid" title="link to this section"><a href="#sec-Default-Type-tag-">4.4.3</a></span>Default Type: `tag`</h3>
-<p>By default, a tag value has the type:</p>
-<pre data-language="gc"><code>tag
-</code></pre>
-<p>When tags are introduced with:</p>
-<pre><code>{A B C}
-</code></pre>
-<p>the resulting type is:</p>
-<pre><code>{ A: tag, B: tag, C: tag }
-</code></pre>
-<p>This allows for composition and safe comparison.</p>
-</section>
-<section id="sec-Example" secid="4.4.4">
-<h3><span class="spec-secid" title="link to this section"><a href="#sec-Example">4.4.4</a></span>Example</h3>
-<pre data-language="gc"><code>let colors = {red blue green}..
-case red of
+<section id="sec-Tag-Type" secid="4.4">
+<h2><span class="spec-secid" title="link to this section"><a href="#sec-Tag-Type">4.4</a></span>Tag Type</h2>
+<p>Tag values are symbolic constants identified solely by their name. The same tag name refers to the same value regardless of where it appears. Tag values have the type <code>tag</code>.</p>
+<pre data-language="gc"><code>let red = tag red..
+let blue = tag blue..
+let c = red..
+case c of
   red: "warm"
   blue: "cool"
   _: "other"
-end
+end..
 </code></pre>
-<p>In this case, <code>red</code>, <code>blue</code>, and <code>green</code> are all of type <code>tag</code>, and <code>case</code> matches by identity.</p>
-</section>
-</section>
-<section id="sec-Example-Annotated-Definitions" secid="4.5">
-<h2><span class="spec-secid" title="link to this section"><a href="#sec-Example-Annotated-Definitions">4.5</a></span>Example: Annotated Definitions</h2>
-<pre data-language="gc"><code>let inc = &lt;x: add x 1&gt;  | type: &lt;number: number&gt;
-let greet = &lt;name: concat "Hello, " name&gt;  | type: &lt;string: string&gt;
-let zip = &lt;xs ys: zipLists xs ys&gt;  | type: &lt;[T] [U]: [(T, U)]&gt;
-</code></pre>
-<p>(Note: actual Graffiticode does not use type annotations in <code>let</code> bindings; types are inferred.)</p>
+<p>In this case, <code>red</code> and <code>blue</code> are tag patterns, and <code>case</code> matches by identity.</p>
 </section>
 </section>
 <section id="sec-Semantics" secid="5">
@@ -374,6 +333,7 @@ let zip = &lt;xs ys: zipLists xs ys&gt;  | type: &lt;[T] [U]: [(T, U)]&gt;
 <h2><span class="spec-secid" title="link to this section"><a href="#sec-Errors">5.4</a></span>Errors</h2>
 <ul>
 <li><strong>Syntax errors</strong>: raised during parsing</li>
+<li><strong>Undefined reference errors</strong>: raised during parsing when an identifier is not a known keyword, builtin, bound variable, or tag</li>
 <li><strong>Type errors</strong>: raised during compilation</li>
 <li><strong>Runtime errors</strong>: e.g., out-of-bounds access</li>
 </ul>
@@ -452,12 +412,12 @@ let zip = &lt;xs ys: zipLists xs ys&gt;  | type: &lt;[T] [U]: [(T, U)]&gt;
 <tr>
 <td align="left"><code>eq</code></td>
 <td align="left"><code>&lt;number number: bool&gt;</code></td>
-<td align="left">Returns true if the two values are equal</td>
+<td align="left">Numeric equality</td>
 </tr>
 <tr>
 <td align="left"><code>equiv</code></td>
 <td align="left"><code>&lt;any any: bool&gt;</code></td>
-<td align="left">Tests if two values are strictly equivalent</td>
+<td align="left">Semantic equivalence for any type, including tags</td>
 </tr>
 <tr>
 <td align="left"><code>filter</code></td>
@@ -669,19 +629,25 @@ drop 0 [1 2 3]       | returns [1 2 3]
 </section>
 <section id="sec-eq" secid="6.2.10">
 <h3><span class="spec-secid" title="link to this section"><a href="#sec-eq">6.2.10</a></span>eq</h3>
-<p>Returns true if the two values are equal</p>
+<p>Numeric equality</p>
 <pre><code>eq 1 1  | returns true
 eq 1 2  | returns false
 </code></pre>
 </section>
 <section id="sec-equiv" secid="6.2.11">
 <h3><span class="spec-secid" title="link to this section"><a href="#sec-equiv">6.2.11</a></span>equiv</h3>
-<p>Tests if two values are strictly equivalent</p>
+<p>Semantic equivalence for any type, including tags</p>
 <pre><code>equiv 1 1        | returns true
 equiv "a" "a"    | returns true
 equiv true true  | returns true
 equiv 1 2        | returns false
 equiv "a" "b"    | returns false
+</code></pre>
+<p>Tags can be compared with <code>equiv</code>:</p>
+<pre data-language="gc"><code>let red = tag red..
+let blue = tag blue..
+equiv red red    | returns true
+equiv red blue   | returns false
 </code></pre>
 </section>
 <section id="sec-filter" secid="6.2.12">
@@ -934,16 +900,7 @@ Written in <a href="https://spec-md.com" target="_blank">Spec Markdown</a>.</foo
 <li id="_sidebar_4.1"><a href="#sec-Primitive-Types"><span class="spec-secid">4.1</span>Primitive Types</a></li>
 <li id="_sidebar_4.2"><a href="#sec-Composite-Types"><span class="spec-secid">4.2</span>Composite Types</a></li>
 <li id="_sidebar_4.3"><a href="#sec-Function-Types"><span class="spec-secid">4.3</span>Function Types</a></li>
-<li id="_sidebar_4.4"><a href="#sec-Tag-Sets-and-Tag-Value-Type"><span class="spec-secid">4.4</span>Tag Sets and Tag Value Type</a>
-<input hidden class="toggle" type="checkbox" id="_toggle_4.4" /><label for="_toggle_4.4"></label>
-<ol>
-<li id="_sidebar_4.4.1"><a href="#sec-Tag-Identity-and-Type"><span class="spec-secid">4.4.1</span>Tag Identity and Type</a></li>
-<li id="_sidebar_4.4.2"><a href="#sec-Tag-Sets-as-Structural-Types"><span class="spec-secid">4.4.2</span>Tag Sets as Structural Types</a></li>
-<li id="_sidebar_4.4.3"><a href="#sec-Default-Type-tag-"><span class="spec-secid">4.4.3</span>Default Type: `tag`</a></li>
-<li id="_sidebar_4.4.4"><a href="#sec-Example"><span class="spec-secid">4.4.4</span>Example</a></li>
-</ol>
-</li>
-<li id="_sidebar_4.5"><a href="#sec-Example-Annotated-Definitions"><span class="spec-secid">4.5</span>Example: Annotated Definitions</a></li>
+<li id="_sidebar_4.4"><a href="#sec-Tag-Type"><span class="spec-secid">4.4</span>Tag Type</a></li>
 </ol>
 </li>
 <li id="_sidebar_5"><a href="#sec-Semantics"><span class="spec-secid">5</span>Semantics</a>
