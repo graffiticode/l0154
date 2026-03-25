@@ -16,9 +16,10 @@
   "dependencies": {
     "@artcompiler/parselatex": "^1.7.7",
     "@graffiticode/auth": "^2.1.2",
-    "@graffiticode/basis": "^1.7.5",
+    "@graffiticode/basis": "^1.8.2",
     "cors": "^2.8.5",
     "errorhandler": "^1.5.1",
+    "graphql": "^16.13.2",
     "graphql-request": "^6.1.0",
     "hashids": "^2.3.0",
     "katex": "^0.16.10",
