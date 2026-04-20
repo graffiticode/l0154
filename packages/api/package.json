@@ -12,12 +12,13 @@
     "lint:fix": "eslint --fix src/ tools/",
     "build-lexicon": "node tools/build-lexicon.js > ./dist/lexicon.js",
     "build-instructions": "node tools/build-instructions.js > ./dist/instructions.md",
-    "build-spec": "npx spec-md ./spec/spec.md > ./dist/spec.html && cp ./spec/template.gc ./dist/template.gc"
+    "build-spec": "npx spec-md ./spec/spec.md > ./dist/spec.html && cp ./spec/template.gc ./dist/template.gc",
+    "build-language-info": "node tools/build-language-info.js"
   },
   "dependencies": {
     "@artcompiler/parselatex": "^1.7.7",
     "@graffiticode/auth": "^2.1.2",
-    "@graffiticode/basis": "^1.9.3",
+    "@graffiticode/basis": "^1.9.4",
     "cors": "^2.8.5",
     "errorhandler": "^1.5.1",
     "graphql": "^16.13.2",

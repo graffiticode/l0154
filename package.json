@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "build": "npm run -w packages/app build && npm run -w packages/api build && npm run build-static",
-    "build-static": "npm run -w packages/api build-lexicon; npm run -w packages/api build-spec; npm run -w packages/api build-instructions",
+    "build-static": "npm run -w packages/api build-lexicon; npm run -w packages/api build-spec; npm run -w packages/api build-instructions; npm run -w packages/api build-language-info",
     "dev": "npm run -w packages/api dev",
     "start": "npm run -w packages/api start",
     "lint": "eslint test/",
