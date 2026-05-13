@@ -7,6 +7,7 @@
     "Problem statement, magic-number/sum expression, and feedback display"
   ],
   "out_of_scope": [
+    "Any puzzle that isn't a magic-square sum puzzle (sudoku, kenken, crosswords, logic grids, word searches, slide puzzles)",
     "Non-sum puzzles (sudoku, kenken, crosswords, logic grids)",
     "Non-integer cells (decimals, fractions, variables)",
     "Full assessment items (multi-part questions, rubrics) — use L0158",
