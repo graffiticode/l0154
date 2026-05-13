@@ -1,0 +1,17 @@
+{
+  "id": "0154",
+  "summary": "Authors magic-square puzzles — interactive n×n grids where students fill in missing numbers so every row, column, and diagonal sums to the same magic number.",
+  "in_scope": [
+    "Magic-square puzzles of arbitrary size with equal row/column/diagonal sum constraints",
+    "Pre-filled cells (initializeGrid) to scaffold the puzzle",
+    "Problem statement, magic-number/sum expression, and feedback display"
+  ],
+  "out_of_scope": [
+    "Non-sum puzzles (sudoku, kenken, crosswords, logic grids)",
+    "Non-integer cells (decimals, fractions, variables)",
+    "Full assessment items (multi-part questions, rubrics) — use L0158",
+    "Generic spreadsheets or free-form table data — use L0166",
+    "Non-grid puzzle layouts — use L0172",
+    "Dynamic puzzle generation at runtime — L0154 configures a specific puzzle"
+  ]
+}

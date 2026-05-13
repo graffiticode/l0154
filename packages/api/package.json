@@ -12,7 +12,7 @@
     "lint:fix": "eslint --fix src/ tools/",
     "build-lexicon": "node tools/build-lexicon.js > ./dist/lexicon.js",
     "build-instructions": "node tools/build-instructions.js > ./dist/instructions.md",
-    "build-spec": "npx spec-md ./spec/spec.md > ./dist/spec.html && cp ./spec/template.gc ./dist/template.gc",
+    "build-spec": "npx spec-md ./spec/spec.md > ./dist/spec.html && cp ./spec/template.gc ./dist/template.gc && cp ./spec/scope.json ./dist/scope.json",
     "build-language-info": "node tools/build-language-info.js"
   },
   "dependencies": {
