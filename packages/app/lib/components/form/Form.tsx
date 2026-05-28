@@ -31,8 +31,8 @@ export function Form({ state }) {
     return <div />;
   }
 
-  if (Array.isArray(state.data.errors) && state.data.errors.length > 0) {
-    return renderErrors(state.data.errors);
+  if (Array.isArray(state.errors) && state.errors.length > 0) {
+    return renderErrors(state.errors);
   }
 
   const { expression, problemStatement, useBgTexture } = state.data;
