@@ -50,6 +50,10 @@ export const createApp = ({ authUrl } = {}) => {
   app.use(routes.auth({ validateToken }));
 
   // serve up static content from dist
+  // Back-compat: the still-deployed console requests lexicon.js; serve the JSON lexicon for it
+  // (it slices from the first "{" and JSON.parses). Registered before express.static so it wins
+  // over any stale public/lexicon.js. Drop once the console migrates to lexicon.json.
+  app.get("/lexicon.js", (req, res) => res.sendFile(path.join(__dirname, "..", "dist", "lexicon.json")));
   app.use(express.static('dist'));
   app.use(express.static('public'));
 

@@ -5,4 +5,4 @@ const lexicon = {
   ...baseLexicon,
   ...langLexicon,
 };
-console.log(`export const lexicon = ${JSON.stringify(lexicon, null, 2)}`);
+console.log(JSON.stringify(lexicon, null, 2));
