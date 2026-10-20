@@ -32,7 +32,15 @@ steps:
         --labels=commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
       - '--region=$_DEPLOY_REGION'
       - '--quiet'
-      - '--set-env-vars=AUTH_URL=$_AUTH_URL'
+      # ISOLATE-01: this compiler reaches the outside only through the egress proxy
+      # (graffiticode/graffiticode deploy/egress-proxy; checked by scripts/legacy-network-check.js).
+      # --update-env-vars, not --set-env-vars: the proxy variables must survive every deploy.
+      - '--network=compilers'
+      - '--subnet=compilers-default'
+      - '--network-tags=compiler'
+      - '--vpc-egress=all-traffic'
+      - '--update-secrets=/etc/egress-ca/ca.pem=egress-proxy-ca-bundle:1'
+      - '--update-env-vars=^@^AUTH_URL=$_AUTH_URL@HTTPS_PROXY=http://10.8.0.2:3128@HTTP_PROXY=http://10.8.0.2:3128@NO_PROXY=169.254.169.254,metadata.google.internal@NODE_EXTRA_CA_CERTS=/etc/egress-ca/ca.pem@NODE_USE_ENV_PROXY=1'
       - '--allow-unauthenticated'
     id: Deploy
     entrypoint: gcloud
